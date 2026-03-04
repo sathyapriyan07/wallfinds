@@ -5,12 +5,13 @@ const TitleLogoCard = ({ media, logo, showDownload = false, showPoster = false }
   const activeLogo = logo || media.title_logos?.[0];
   const mediaTitle = media.title || 'Untitled';
   const imageSrc = showPoster ? media.poster : activeLogo?.logo_url;
+  const telegramLink = activeLogo?.telegram_file_link || activeLogo?.telegram_download_link;
 
   const handleDownload = async (event) => {
     event.preventDefault();
     event.stopPropagation();
-    if (!activeLogo?.telegram_download_link) return;
-    window.open(activeLogo.telegram_download_link, '_blank', 'noopener,noreferrer');
+    if (!telegramLink) return;
+    window.open(telegramLink, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -38,15 +39,15 @@ const TitleLogoCard = ({ media, logo, showDownload = false, showPoster = false }
               <button
                 type="button"
                 onClick={handleDownload}
-                disabled={!activeLogo?.telegram_download_link}
+                disabled={!telegramLink}
                 className="w-full py-2 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 transition text-sm font-medium inline-flex items-center justify-center gap-2 disabled:opacity-40"
               >
                 <FiDownload size={14} />
                 Download Logo
               </button>
             )}
-            {showDownload && !showPoster && !activeLogo?.telegram_download_link && (
-              <p className="text-xs text-slate-400 mt-2">Download link not available.</p>
+            {showDownload && !showPoster && !telegramLink && (
+              <p className="text-xs text-slate-400 mt-2">Download link coming soon.</p>
             )}
           </div>
         </div>

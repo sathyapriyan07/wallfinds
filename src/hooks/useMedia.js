@@ -110,6 +110,25 @@ export const useCreateTitleLogos = () => {
   });
 };
 
+export const useUpdateTitleLogo = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, updates }) => {
+      const { data, error } = await supabase
+        .from('title_logos')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['media']);
+    },
+  });
+};
+
 export const useMediaWallpapers = (mediaId) => {
   return useQuery({
     queryKey: ['wallpapers', 'media', mediaId],

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { FiCheckSquare, FiSquare } from 'react-icons/fi';
 import { searchMovies, searchTVShows, getMovieLogos, getTVLogos, getImageUrl } from '../services/tmdbApi';
-import { useCreateMedia, useCreateTitleLogos, useMedia } from '../hooks/useMedia';
+import { useCreateMedia, useCreateTitleLogos, useMedia, useUpdateTitleLogo } from '../hooks/useMedia';
 
 const ImportMedia = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -14,11 +14,14 @@ const ImportMedia = () => {
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [selectedLogoPaths, setSelectedLogoPaths] = useState([]);
   const [logoTelegramLinks, setLogoTelegramLinks] = useState({});
+  const [existingLogoLinks, setExistingLogoLinks] = useState({});
+  const [savingLogoId, setSavingLogoId] = useState(null);
   const [importing, setImporting] = useState(false);
 
   const { data: existingMedia = [] } = useMedia();
   const createMedia = useCreateMedia();
   const createTitleLogos = useCreateTitleLogos();
+  const updateTitleLogo = useUpdateTitleLogo();
 
   const logosQuery = useQuery({
     queryKey: ['tmdb-logos', searchType, selectedMedia?.id],
@@ -38,6 +41,8 @@ const ImportMedia = () => {
     const selectedSet = new Set(selectedLogoPaths);
     return logos.filter((logo) => selectedSet.has(logo.file_path));
   }, [logos, selectedLogoPaths]);
+
+  const getLogoLink = (logo) => logo.telegram_file_link || logo.telegram_download_link || '';
 
   const handleSearch = (event) => {
     event.preventDefault();
@@ -117,7 +122,7 @@ const ImportMedia = () => {
         .map((logo) => ({
           media_id: mediaRecord.id,
           logo_url: getImageUrl(logo.file_path, 'original'),
-          telegram_download_link: logoTelegramLinks[logo.file_path]?.trim() || null,
+          telegram_file_link: logoTelegramLinks[logo.file_path]?.trim() || null,
           language: logo.iso_639_1,
           width: logo.width,
           height: logo.height,
@@ -142,6 +147,21 @@ const ImportMedia = () => {
       alert(`Error importing logos: ${error.message}`);
     } finally {
       setImporting(false);
+    }
+  };
+
+  const handleSaveExistingLogoLink = async (logoId) => {
+    const nextLink = (existingLogoLinks[logoId] || '').trim();
+    setSavingLogoId(logoId);
+    try {
+      await updateTitleLogo.mutateAsync({
+        id: logoId,
+        updates: { telegram_file_link: nextLink || null },
+      });
+    } catch (error) {
+      alert(`Failed to save Telegram file link: ${error.message}`);
+    } finally {
+      setSavingLogoId(null);
     }
   };
 
@@ -331,6 +351,65 @@ const ImportMedia = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {existingMedia.some((media) => media.title_logos?.length) && (
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold mb-6">Manage Imported Logo Links</h2>
+          <div className="space-y-6">
+            {existingMedia
+              .filter((media) => media.title_logos?.length)
+              .map((media) => (
+                <section key={media.id} className="glass p-4 rounded-xl">
+                  <h3 className="font-semibold mb-4">{media.title}</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {media.title_logos.map((logo) => {
+                      const inputValue = existingLogoLinks[logo.id] ?? getLogoLink(logo);
+                      return (
+                        <article key={logo.id} className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+                          <div className="h-20 rounded-lg bg-black/30 border border-white/10 flex items-center justify-center mb-3">
+                            <img
+                              src={logo.logo_url}
+                              alt={`${media.title} logo`}
+                              loading="lazy"
+                              className="max-w-full max-h-16 object-contain"
+                            />
+                          </div>
+                          <p className="text-xs text-gray-400 mb-2">
+                            Language: {logo.language || 'n/a'} | {logo.width}x{logo.height}
+                          </p>
+                          <label htmlFor={`logo-link-${logo.id}`} className="text-xs text-gray-300 mb-1 block">
+                            Telegram File Link
+                          </label>
+                          <input
+                            id={`logo-link-${logo.id}`}
+                            type="url"
+                            value={inputValue}
+                            onChange={(event) =>
+                              setExistingLogoLinks((prev) => ({
+                                ...prev,
+                                [logo.id]: event.target.value,
+                              }))
+                            }
+                            placeholder="https://t.me/channelname/120"
+                            className="w-full mb-3 px-3 py-2 text-xs bg-white/5 border border-white/10 rounded-lg"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleSaveExistingLogoLink(logo.id)}
+                            disabled={savingLogoId === logo.id}
+                            className="w-full px-3 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-sm font-medium disabled:opacity-50"
+                          >
+                            {savingLogoId === logo.id ? 'Saving...' : 'Save Link'}
+                          </button>
+                        </article>
+                      );
+                    })}
+                  </div>
+                </section>
+              ))}
           </div>
         </div>
       )}

@@ -26,7 +26,7 @@ CREATE TABLE title_logos (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   media_id UUID REFERENCES media(id) ON DELETE CASCADE,
   logo_url TEXT NOT NULL,
-  telegram_download_link TEXT,
+  telegram_file_link TEXT,
   language TEXT,
   width INTEGER,
   height INTEGER,
@@ -164,6 +164,15 @@ CREATE POLICY "Title logos are viewable by everyone"
 CREATE POLICY "Title logos are insertable by admins"
   ON title_logos FOR INSERT
   WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM users
+      WHERE users.id = auth.uid() AND users.role = 'admin'
+    )
+  );
+
+CREATE POLICY "Title logos are updatable by admins"
+  ON title_logos FOR UPDATE
+  USING (
     EXISTS (
       SELECT 1 FROM users
       WHERE users.id = auth.uid() AND users.role = 'admin'
