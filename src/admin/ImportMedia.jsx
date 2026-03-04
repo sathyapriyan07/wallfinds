@@ -1,13 +1,16 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { FiCheckSquare, FiSearch, FiSquare } from 'react-icons/fi';
+import { FiCheckSquare, FiSquare } from 'react-icons/fi';
 import { searchMovies, searchTVShows, getMovieLogos, getTVLogos, getImageUrl } from '../services/tmdbApi';
 import { useCreateMedia, useCreateTitleLogos, useMedia } from '../hooks/useMedia';
 
 const ImportMedia = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchType, setSearchType] = useState('movie');
-  const [submittedQuery, setSubmittedQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState('');
+  const [hasSearched, setHasSearched] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [selectedLogoPaths, setSelectedLogoPaths] = useState([]);
   const [importing, setImporting] = useState(false);
@@ -15,18 +18,6 @@ const ImportMedia = () => {
   const { data: existingMedia = [] } = useMedia();
   const createMedia = useCreateMedia();
   const createTitleLogos = useCreateTitleLogos();
-
-  const searchResultsQuery = useQuery({
-    queryKey: ['tmdb-search', searchType, submittedQuery],
-    queryFn: async () => {
-      if (!submittedQuery.trim()) return [];
-      return searchType === 'movie'
-        ? searchMovies(submittedQuery.trim())
-        : searchTVShows(submittedQuery.trim());
-    },
-    enabled: !!submittedQuery.trim(),
-    staleTime: 10 * 60 * 1000,
-  });
 
   const logosQuery = useQuery({
     queryKey: ['tmdb-logos', searchType, selectedMedia?.id],
@@ -41,7 +32,6 @@ const ImportMedia = () => {
   });
 
   const logos = useMemo(() => logosQuery.data || [], [logosQuery.data]);
-  const searchResults = searchResultsQuery.data || [];
 
   const selectedLogos = useMemo(() => {
     const selectedSet = new Set(selectedLogoPaths);
@@ -50,9 +40,30 @@ const ImportMedia = () => {
 
   const handleSearch = (event) => {
     event.preventDefault();
+    const trimmedQuery = searchQuery.trim();
+    if (!trimmedQuery) return;
+
     setSelectedMedia(null);
     setSelectedLogoPaths([]);
-    setSubmittedQuery(searchQuery);
+    setSearchError('');
+    setHasSearched(true);
+    setSearchLoading(true);
+
+    const runSearch = async () => {
+      try {
+        const results = searchType === 'movie'
+          ? await searchMovies(trimmedQuery)
+          : await searchTVShows(trimmedQuery);
+        setSearchResults(results || []);
+      } catch {
+        setSearchResults([]);
+        setSearchError('Failed to fetch TMDB results');
+      } finally {
+        setSearchLoading(false);
+      }
+    };
+
+    runSearch();
   };
 
   const handleSelectMedia = (media) => {
@@ -112,8 +123,9 @@ const ImportMedia = () => {
       alert(`Imported ${logosToInsert.length} title logo(s) successfully.`);
       setSelectedMedia(null);
       setSelectedLogoPaths([]);
-      setSubmittedQuery('');
       setSearchQuery('');
+      setSearchResults([]);
+      setHasSearched(false);
     } catch (error) {
       alert(`Error importing logos: ${error.message}`);
     } finally {
@@ -127,66 +139,73 @@ const ImportMedia = () => {
 
       <div className="glass p-6 rounded-lg mb-8">
         <form onSubmit={handleSearch} className="space-y-4">
-          <div className="flex gap-4">
+          <div className="flex flex-col md:flex-row gap-3 md:gap-4">
             <select
               value={searchType}
               onChange={(event) => setSearchType(event.target.value)}
-              className="px-4 py-2 bg-white/5 border border-white/10 rounded-lg"
+              className="w-full md:w-auto px-4 py-2 bg-white/5 border border-white/10 rounded-lg"
             >
               <option value="movie">Movie</option>
               <option value="tv">TV Series</option>
             </select>
 
-            <div className="flex-1 relative">
+            <div className="flex-1">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Search TMDB..."
-                className="w-full px-4 py-2 pl-10 bg-white/5 border border-white/10 rounded-lg"
+                placeholder="Search movie or series..."
+                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg"
               />
-              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             </div>
 
             <button
               type="submit"
-              disabled={searchResultsQuery.isLoading}
-              className="px-6 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50"
+              disabled={searchLoading}
+              className="w-full md:w-auto px-6 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50"
             >
-              {searchResultsQuery.isLoading ? 'Searching...' : 'Search'}
+              {searchLoading ? 'Searching...' : 'Search'}
             </button>
           </div>
         </form>
       </div>
 
-      {searchResultsQuery.isError && (
-        <p className="text-red-400 mb-6">Error searching TMDB: {searchResultsQuery.error.message}</p>
-      )}
+      {searchLoading && <p className="mb-6">Loading...</p>}
+      {searchError && <p className="text-red-400 mb-6">{searchError}</p>}
 
       {searchResults.length > 0 && !selectedMedia && (
         <div>
           <h2 className="text-xl font-bold mb-4">Search Results</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {searchResults.map((media) => (
-              <div
-                key={media.id}
-                onClick={() => handleSelectMedia(media)}
-                className="glass rounded-lg overflow-hidden cursor-pointer hover:ring-2 ring-purple-500 transition"
-              >
+              <div key={media.id} className="glass rounded-lg overflow-hidden">
                 <img
                   src={getImageUrl(media.poster_path, 'w300')}
                   alt={media.title || media.name}
                   loading="lazy"
-                  className="w-full h-64 object-cover"
+                  className="w-full aspect-[2/3] object-cover"
                 />
                 <div className="p-3">
                   <p className="text-sm font-semibold truncate">{media.title || media.name}</p>
-                  <p className="text-xs text-gray-400">{media.release_date || media.first_air_date}</p>
+                  <p className="text-xs text-gray-400 mb-3">
+                    {(media.release_date || media.first_air_date || '').slice(0, 4)}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectMedia(media)}
+                    className="w-full px-3 py-2 bg-indigo-500 rounded-lg hover:bg-indigo-600 text-sm font-medium"
+                  >
+                    Import
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         </div>
+      )}
+
+      {!searchLoading && !searchError && hasSearched && searchResults.length === 0 && !selectedMedia && (
+        <p className="text-gray-400">No results found for this search.</p>
       )}
 
       {selectedMedia && (

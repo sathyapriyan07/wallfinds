@@ -12,12 +12,16 @@ const tmdbApi = axios.create({
 });
 
 export const searchMovies = async (query) => {
-  const { data } = await tmdbApi.get('/search/movie', { params: { query } });
+  const { data } = await tmdbApi.get('/search/movie', {
+    params: { query, language: 'en-US' },
+  });
   return data.results;
 };
 
 export const searchTVShows = async (query) => {
-  const { data } = await tmdbApi.get('/search/tv', { params: { query } });
+  const { data } = await tmdbApi.get('/search/tv', {
+    params: { query, language: 'en-US' },
+  });
   return data.results;
 };
 
