@@ -3,9 +3,9 @@ import { FiDownload } from 'react-icons/fi';
 
 const WallpaperCard = ({ wallpaper }) => {
   return (
-    <Link to={`/wallpaper/${wallpaper.id}`} className="group block flex-shrink-0 w-[290px]">
+    <Link to={`/wallpaper/${wallpaper.id}`} className="group block snap-card w-full">
       <article className="media-card relative">
-        <div className="relative h-[175px] overflow-hidden">
+        <div className="relative aspect-[16/10] overflow-hidden">
           <img
             src={wallpaper.thumbnail_url}
             alt={wallpaper.title}

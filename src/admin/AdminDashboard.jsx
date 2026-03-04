@@ -1,15 +1,16 @@
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { FiFilm, FiGrid, FiHome, FiImage } from 'react-icons/fi';
 import { useAuth, useIsAdmin } from '../hooks/useAuth';
 import { Navigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, loading } = useIsAdmin();
 
   if (authLoading || loading) {
-    return <div className="section-wrap px-4 py-8">Loading...</div>;
+    return <div className="section-wrap py-8">Loading...</div>;
   }
 
   if (!user) {
@@ -28,9 +29,24 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="section-wrap px-4 py-8">
+    <div className="section-wrap py-8">
+      <div className="mb-4 lg:hidden">
+        <label className="small-label text-xs text-slate-400 mb-2 block">Admin Section</label>
+        <select
+          value={location.pathname}
+          onChange={(event) => navigate(event.target.value)}
+          className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl"
+        >
+          {navItems.map((item) => (
+            <option key={item.path} value={item.path}>
+              {item.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6">
-        <aside className="glass rounded-2xl border border-white/10">
+        <aside className="hidden lg:block glass rounded-2xl border border-white/10">
           <div className="p-6">
             <h2 className="text-2xl font-semibold mb-1">Admin Panel</h2>
             <p className="text-sm text-slate-400 mb-6">Control center</p>

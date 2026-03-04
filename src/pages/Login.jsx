@@ -25,7 +25,7 @@ const Login = () => {
   };
 
   return (
-    <div className="section-wrap min-h-[80vh] flex items-center justify-center px-4">
+    <div className="section-wrap min-h-screen flex items-center justify-center py-8">
       <div className="w-full max-w-md glass p-8 rounded-2xl">
         <h1 className="text-3xl font-bold mb-6 text-center">Login</h1>
         

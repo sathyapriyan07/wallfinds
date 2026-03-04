@@ -43,12 +43,12 @@ const TitleLogoCard = ({ media, logo, showDownload = false, showPoster = false }
   };
 
   return (
-    <Link to={`/${media.type}/${media.id}`} className="group block flex-shrink-0 w-[260px]">
-      <article className={`relative ${showPoster ? 'h-[360px]' : 'h-[170px]'} rounded-2xl border border-white/10 overflow-hidden bg-white/[0.03] transition duration-300 group-hover:shadow-[0_12px_30px_rgba(86,117,255,0.25)] group-hover:border-indigo-300/45`}>
+    <Link to={`/${media.type}/${media.id}`} className="group block snap-card w-full">
+      <article className={`relative ${showPoster ? 'h-[320px] sm:h-[360px]' : 'h-[170px]'} rounded-2xl border border-white/10 overflow-hidden bg-white/[0.03] transition duration-300 group-hover:shadow-[0_12px_30px_rgba(86,117,255,0.25)] group-hover:border-indigo-300/45`}>
         <div className="absolute inset-0 bg-gradient-to-br from-white/[0.07] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
         <div className="h-full p-4 flex flex-col justify-between">
-          <div className={`${showPoster ? 'h-[280px]' : 'h-20'} rounded-xl bg-black/25 border border-white/5 flex items-center justify-center ${showPoster ? 'px-0 overflow-hidden' : 'px-4'}`}>
+          <div className={`${showPoster ? 'h-[245px] sm:h-[280px]' : 'h-20'} rounded-xl bg-black/25 border border-white/5 flex items-center justify-center ${showPoster ? 'px-0 overflow-hidden' : 'px-4'}`}>
             {imageSrc ? (
               <img
                 src={imageSrc}
