@@ -21,6 +21,10 @@ html, body, #root {
   overflow-x: clip;
 }
 
+html {
+  font-size: 13px;
+}
+
 img, video, canvas, svg {
   max-width: 100%;
 }
