@@ -114,14 +114,12 @@ export const useUpdateTitleLogo = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, updates }) => {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('title_logos')
         .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
+        .eq('id', id);
       if (error) throw error;
-      return data;
+      return { id, ...updates };
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['media']);
