@@ -4,6 +4,8 @@ import { FiDownload, FiTag } from 'react-icons/fi';
 import { useWallpaper, useWallpapers, useIncrementDownload } from '../hooks/useWallpapers';
 import WallpaperCard from '../components/WallpaperCard';
 import { normalizeTmdbToOriginal } from '../utils/imageUrl';
+import { useSiteSettingsContext } from '../hooks/useSiteSettingsContext';
+import { downloadWithOptionalTelegramRedirect } from '../utils/download';
 
 const WallpaperDetail = () => {
   const { id } = useParams();
@@ -13,34 +15,21 @@ const WallpaperDetail = () => {
     limit: 4 
   });
   const incrementDownload = useIncrementDownload();
+  const { settings } = useSiteSettingsContext();
   const [actualResolution, setActualResolution] = useState('');
 
   const fullQualityImageUrl = wallpaper?.image_url ? normalizeTmdbToOriginal(wallpaper.image_url) : '';
   const displayResolution = actualResolution || wallpaper?.resolution;
 
-  const triggerDownload = (href, filename) => {
-    const link = document.createElement('a');
-    link.href = href;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   const handleDownload = async () => {
     const extension = fullQualityImageUrl.toLowerCase().includes('.png') ? 'png' : 'jpg';
     const fileName = `${wallpaper.title}.${extension}`;
 
-    try {
-      const response = await fetch(fullQualityImageUrl);
-      if (!response.ok) throw new Error('Download failed');
-      const blob = await response.blob();
-      const objectUrl = URL.createObjectURL(blob);
-      triggerDownload(objectUrl, fileName);
-      URL.revokeObjectURL(objectUrl);
-    } catch {
-      triggerDownload(fullQualityImageUrl, fileName);
-    }
+    await downloadWithOptionalTelegramRedirect({
+      url: fullQualityImageUrl,
+      filename: fileName,
+      settings,
+    });
 
     await incrementDownload.mutateAsync(wallpaper.id);
   };

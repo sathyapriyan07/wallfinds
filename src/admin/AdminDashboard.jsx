@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { FiFilm, FiGrid, FiHome, FiImage } from 'react-icons/fi';
+import { FiFilm, FiGrid, FiHome, FiImage, FiSettings } from 'react-icons/fi';
 import { useAuth, useIsAdmin } from '../hooks/useAuth';
 import { Navigate } from 'react-router-dom';
 
@@ -26,6 +26,7 @@ const AdminDashboard = () => {
     { path: '/admin/wallpapers', icon: FiImage, label: 'Wallpapers' },
     { path: '/admin/categories', icon: FiGrid, label: 'Categories' },
     { path: '/admin/media', icon: FiFilm, label: 'Movies/Series' },
+    { path: '/admin/settings', icon: FiSettings, label: 'Settings' },
   ];
 
   return (

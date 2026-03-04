@@ -1,36 +1,20 @@
 import { Link } from 'react-router-dom';
 import { FiDownload } from 'react-icons/fi';
+import { useSiteSettingsContext } from '../hooks/useSiteSettingsContext';
+import { downloadWithOptionalTelegramRedirect } from '../utils/download';
 
 const sanitizeFilename = (value) => {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 };
 
-const triggerDownload = (href, filename) => {
-  const link = document.createElement('a');
-  link.href = href;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
-
-const downloadLogo = async (url, title) => {
+const downloadLogo = async (url, title, settings) => {
   const safeTitle = sanitizeFilename(title || 'media');
   const filename = `${safeTitle}-title-logo.png`;
-
-  try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`Failed with status ${response.status}`);
-    const blob = await response.blob();
-    const blobUrl = URL.createObjectURL(blob);
-    triggerDownload(blobUrl, filename);
-    URL.revokeObjectURL(blobUrl);
-  } catch {
-    triggerDownload(url, filename);
-  }
+  await downloadWithOptionalTelegramRedirect({ url, filename, settings });
 };
 
 const TitleLogoCard = ({ media, logo, showDownload = false, showPoster = false }) => {
+  const { settings } = useSiteSettingsContext();
   const activeLogo = logo || media.title_logos?.[0];
   const mediaTitle = media.title || 'Untitled';
   const imageSrc = showPoster ? media.poster : activeLogo?.logo_url;
@@ -39,7 +23,7 @@ const TitleLogoCard = ({ media, logo, showDownload = false, showPoster = false }
     event.preventDefault();
     event.stopPropagation();
     if (!activeLogo?.logo_url) return;
-    await downloadLogo(activeLogo.logo_url, mediaTitle);
+    await downloadLogo(activeLogo.logo_url, mediaTitle, settings);
   };
 
   return (

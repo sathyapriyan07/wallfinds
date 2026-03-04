@@ -64,6 +64,15 @@ CREATE TABLE favorites (
   UNIQUE(user_id, wallpaper_id)
 );
 
+-- Site settings table
+CREATE TABLE site_settings (
+  id INTEGER PRIMARY KEY DEFAULT 1,
+  telegram_link TEXT DEFAULT '',
+  enable_telegram_redirect BOOLEAN DEFAULT FALSE,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  CONSTRAINT site_settings_singleton CHECK (id = 1)
+);
+
 -- Function to increment downloads
 CREATE OR REPLACE FUNCTION increment_downloads(wallpaper_id UUID)
 RETURNS VOID AS $$
@@ -97,6 +106,7 @@ ALTER TABLE title_logos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE wallpapers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE favorites ENABLE ROW LEVEL SECURITY;
+ALTER TABLE site_settings ENABLE ROW LEVEL SECURITY;
 
 -- Categories policies (public read, admin write)
 CREATE POLICY "Categories are viewable by everyone"
@@ -207,6 +217,29 @@ CREATE POLICY "Users can insert their own favorites"
 CREATE POLICY "Users can delete their own favorites"
   ON favorites FOR DELETE
   USING (auth.uid() = user_id);
+
+-- Site settings policies
+CREATE POLICY "Site settings are viewable by everyone"
+  ON site_settings FOR SELECT
+  USING (true);
+
+CREATE POLICY "Site settings are insertable by admins"
+  ON site_settings FOR INSERT
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM users
+      WHERE users.id = auth.uid() AND users.role = 'admin'
+    )
+  );
+
+CREATE POLICY "Site settings are updatable by admins"
+  ON site_settings FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM users
+      WHERE users.id = auth.uid() AND users.role = 'admin'
+    )
+  );
 
 -- Create indexes for better performance
 CREATE INDEX idx_wallpapers_category ON wallpapers(category_id);
