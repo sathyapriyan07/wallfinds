@@ -4,8 +4,6 @@ import { FiDownload, FiTag } from 'react-icons/fi';
 import { useWallpaper, useWallpapers, useIncrementDownload } from '../hooks/useWallpapers';
 import WallpaperCard from '../components/WallpaperCard';
 import { normalizeTmdbToOriginal } from '../utils/imageUrl';
-import { useSiteSettingsContext } from '../hooks/useSiteSettingsContext';
-import { downloadWithOptionalTelegramRedirect } from '../utils/download';
 
 const WallpaperDetail = () => {
   const { id } = useParams();
@@ -15,21 +13,14 @@ const WallpaperDetail = () => {
     limit: 4 
   });
   const incrementDownload = useIncrementDownload();
-  const { settings } = useSiteSettingsContext();
   const [actualResolution, setActualResolution] = useState('');
 
   const fullQualityImageUrl = wallpaper?.image_url ? normalizeTmdbToOriginal(wallpaper.image_url) : '';
   const displayResolution = actualResolution || wallpaper?.resolution;
 
   const handleDownload = async () => {
-    const extension = fullQualityImageUrl.toLowerCase().includes('.png') ? 'png' : 'jpg';
-    const fileName = `${wallpaper.title}.${extension}`;
-
-    await downloadWithOptionalTelegramRedirect({
-      url: fullQualityImageUrl,
-      filename: fileName,
-      settings,
-    });
+    if (!wallpaper.telegram_download_link) return;
+    window.open(wallpaper.telegram_download_link, '_blank', 'noopener,noreferrer');
 
     await incrementDownload.mutateAsync(wallpaper.id);
   };
@@ -78,11 +69,15 @@ const WallpaperDetail = () => {
 
           <button
             onClick={handleDownload}
+            disabled={!wallpaper.telegram_download_link}
             className="w-full py-3 btn-primary rounded-xl flex items-center justify-center gap-2 transition"
           >
             <FiDownload size={20} />
             Download Wallpaper
           </button>
+          {!wallpaper.telegram_download_link && (
+            <p className="text-xs text-slate-400">Download link not available.</p>
+          )}
 
           {wallpaper.tags && wallpaper.tags.length > 0 && (
             <div>

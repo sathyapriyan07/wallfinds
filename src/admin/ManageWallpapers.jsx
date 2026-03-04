@@ -21,6 +21,7 @@ const ManageWallpapers = () => {
     media_id: '',
     image_url: '',
     thumbnail_url: '',
+    telegram_download_link: '',
     tags: '',
     resolution: '',
     featured: false,
@@ -104,7 +105,7 @@ const ManageWallpapers = () => {
 
       setShowForm(false);
       setEditingId(null);
-      setFormData({ title: '', category_id: '', media_id: '', image_url: '', thumbnail_url: '', tags: '', resolution: '', featured: false });
+      setFormData({ title: '', category_id: '', media_id: '', image_url: '', thumbnail_url: '', telegram_download_link: '', tags: '', resolution: '', featured: false });
     } catch (error) {
       alert(`Error: ${error.message}`);
     } finally {
@@ -120,6 +121,7 @@ const ManageWallpapers = () => {
       media_id: wallpaper.media_id || '',
       image_url: wallpaper.image_url,
       thumbnail_url: wallpaper.thumbnail_url,
+      telegram_download_link: wallpaper.telegram_download_link || '',
       tags: wallpaper.tags?.join(', ') || '',
       resolution: wallpaper.resolution,
       featured: wallpaper.featured || false,
@@ -141,7 +143,7 @@ const ManageWallpapers = () => {
           onClick={() => {
             setShowForm(true);
             setEditingId(null);
-            setFormData({ title: '', category_id: '', media_id: '', image_url: '', thumbnail_url: '', tags: '', resolution: '', featured: false });
+            setFormData({ title: '', category_id: '', media_id: '', image_url: '', thumbnail_url: '', telegram_download_link: '', tags: '', resolution: '', featured: false });
           }}
           className="btn-primary inline-flex items-center gap-2"
         >
@@ -257,6 +259,18 @@ const ManageWallpapers = () => {
             </label>
 
             <label className="space-y-2">
+              <span className="small-label text-sm">Telegram Download Link</span>
+              <input
+                type="url"
+                value={formData.telegram_download_link}
+                onChange={(event) => setFormData({ ...formData, telegram_download_link: event.target.value })}
+                placeholder="https://t.me/channel_name/123"
+                required
+                className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl"
+              />
+            </label>
+
+            <label className="space-y-2">
               <span className="small-label text-sm">Tags</span>
               <input
                 type="text"
@@ -298,6 +312,7 @@ const ManageWallpapers = () => {
               <th className="px-4 py-3 text-sm font-medium">Movie/Series</th>
               <th className="px-4 py-3 text-sm font-medium">Downloads</th>
               <th className="px-4 py-3 text-sm font-medium">Resolution</th>
+              <th className="px-4 py-3 text-sm font-medium">Telegram Link</th>
               <th className="px-4 py-3 text-sm font-medium">Actions</th>
             </tr>
           </thead>
@@ -314,6 +329,20 @@ const ManageWallpapers = () => {
                 </td>
                 <td className="px-4 py-3 text-slate-300">{wallpaper.downloads || 0}</td>
                 <td className="px-4 py-3 text-slate-300">{wallpaper.resolution}</td>
+                <td className="px-4 py-3 text-slate-300">
+                  {wallpaper.telegram_download_link ? (
+                    <a
+                      href={wallpaper.telegram_download_link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-indigo-300 hover:text-indigo-200"
+                    >
+                      Open
+                    </a>
+                  ) : (
+                    '-'
+                  )}
+                </td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2">
                     <button onClick={() => handleEdit(wallpaper)} className="btn-soft inline-flex items-center gap-1 px-3 py-1.5">

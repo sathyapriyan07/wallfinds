@@ -13,6 +13,7 @@ const ImportMedia = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [selectedLogoPaths, setSelectedLogoPaths] = useState([]);
+  const [logoTelegramLinks, setLogoTelegramLinks] = useState({});
   const [importing, setImporting] = useState(false);
 
   const { data: existingMedia = [] } = useMedia();
@@ -69,6 +70,7 @@ const ImportMedia = () => {
   const handleSelectMedia = (media) => {
     setSelectedMedia(media);
     setSelectedLogoPaths([]);
+    setLogoTelegramLinks({});
   };
 
   const toggleLogoSelection = (filePath) => {
@@ -82,6 +84,14 @@ const ImportMedia = () => {
 
   const handleImportSelected = async () => {
     if (!selectedMedia || selectedLogos.length === 0) {
+      return;
+    }
+
+    const missingLinks = selectedLogos.filter(
+      (logo) => !logoTelegramLinks[logo.file_path]?.trim()
+    );
+    if (missingLinks.length > 0) {
+      alert('Please add Telegram download links for all selected logos.');
       return;
     }
 
@@ -107,6 +117,7 @@ const ImportMedia = () => {
         .map((logo) => ({
           media_id: mediaRecord.id,
           logo_url: getImageUrl(logo.file_path, 'original'),
+          telegram_download_link: logoTelegramLinks[logo.file_path]?.trim() || null,
           language: logo.iso_639_1,
           width: logo.width,
           height: logo.height,
@@ -123,6 +134,7 @@ const ImportMedia = () => {
       alert(`Imported ${logosToInsert.length} title logo(s) successfully.`);
       setSelectedMedia(null);
       setSelectedLogoPaths([]);
+      setLogoTelegramLinks({});
       setSearchQuery('');
       setSearchResults([]);
       setHasSearched(false);
@@ -215,6 +227,7 @@ const ImportMedia = () => {
               onClick={() => {
                 setSelectedMedia(null);
                 setSelectedLogoPaths([]);
+                setLogoTelegramLinks({});
               }}
               className="text-purple-400 hover:text-purple-300"
             >
@@ -273,6 +286,20 @@ const ImportMedia = () => {
                         className="max-w-full max-h-16 object-contain"
                       />
                     </div>
+
+                    <input
+                      type="url"
+                      value={logoTelegramLinks[logo.file_path] || ''}
+                      onChange={(event) =>
+                        setLogoTelegramLinks((prev) => ({
+                          ...prev,
+                          [logo.file_path]: event.target.value,
+                        }))
+                      }
+                      placeholder="https://t.me/channel_name/123"
+                      className="w-full mb-3 px-3 py-2 text-xs bg-white/5 border border-white/10 rounded-lg"
+                      onClick={(event) => event.stopPropagation()}
+                    />
 
                     <p className="text-xs text-gray-400 truncate">{logo.file_path}</p>
                   </button>

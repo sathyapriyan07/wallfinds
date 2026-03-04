@@ -1,20 +1,7 @@
 import { Link } from 'react-router-dom';
 import { FiDownload } from 'react-icons/fi';
-import { useSiteSettingsContext } from '../hooks/useSiteSettingsContext';
-import { downloadWithOptionalTelegramRedirect } from '../utils/download';
-
-const sanitizeFilename = (value) => {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-};
-
-const downloadLogo = async (url, title, settings) => {
-  const safeTitle = sanitizeFilename(title || 'media');
-  const filename = `${safeTitle}-title-logo.png`;
-  await downloadWithOptionalTelegramRedirect({ url, filename, settings });
-};
 
 const TitleLogoCard = ({ media, logo, showDownload = false, showPoster = false }) => {
-  const { settings } = useSiteSettingsContext();
   const activeLogo = logo || media.title_logos?.[0];
   const mediaTitle = media.title || 'Untitled';
   const imageSrc = showPoster ? media.poster : activeLogo?.logo_url;
@@ -22,8 +9,8 @@ const TitleLogoCard = ({ media, logo, showDownload = false, showPoster = false }
   const handleDownload = async (event) => {
     event.preventDefault();
     event.stopPropagation();
-    if (!activeLogo?.logo_url) return;
-    await downloadLogo(activeLogo.logo_url, mediaTitle, settings);
+    if (!activeLogo?.telegram_download_link) return;
+    window.open(activeLogo.telegram_download_link, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -51,12 +38,15 @@ const TitleLogoCard = ({ media, logo, showDownload = false, showPoster = false }
               <button
                 type="button"
                 onClick={handleDownload}
-                disabled={!activeLogo?.logo_url}
+                disabled={!activeLogo?.telegram_download_link}
                 className="w-full py-2 rounded-xl border border-white/20 bg-white/10 hover:bg-white/20 transition text-sm font-medium inline-flex items-center justify-center gap-2 disabled:opacity-40"
               >
                 <FiDownload size={14} />
                 Download Logo
               </button>
+            )}
+            {showDownload && !showPoster && !activeLogo?.telegram_download_link && (
+              <p className="text-xs text-slate-400 mt-2">Download link not available.</p>
             )}
           </div>
         </div>
