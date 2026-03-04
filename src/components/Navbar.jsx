@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiChevronDown, FiLogOut, FiMenu, FiSearch, FiUser, FiX } from 'react-icons/fi';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth, useIsAdmin } from '../hooks/useAuth';
 import { useCategories } from '../hooks/useCategories';
 import { signOut } from '../services/supabaseClient';
 
@@ -11,6 +11,7 @@ const Navbar = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isAdmin } = useIsAdmin();
   const { data: categories } = useCategories();
   const dropdownRef = useRef(null);
 
@@ -42,7 +43,7 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#070c18]/80 backdrop-blur-xl">
       <div className="section-wrap py-2.5">
         <div className="flex items-center justify-between gap-3">
-          <Link to="/" className="text-[1.8rem] font-semibold tracking-tight text-white whitespace-nowrap">
+          <Link to="/" className="text-[1.55rem] md:text-[1.8rem] font-semibold tracking-tight text-white whitespace-nowrap">
             Wall<span className="text-indigo-300">Finds</span>
           </Link>
 
@@ -100,13 +101,22 @@ const Navbar = () => {
             )}
           </div>
 
-          <button
-            onClick={() => setShowMobileMenu((prev) => !prev)}
-            className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border border-white/15 bg-white/5"
-            aria-label="Toggle menu"
-          >
-            {showMobileMenu ? <FiX size={20} /> : <FiMenu size={20} />}
-          </button>
+          <div className="md:hidden flex items-center gap-2">
+            <button
+              onClick={() => navigate('/search')}
+              className="inline-flex items-center justify-center w-10 h-10 rounded-xl border border-white/15 bg-white/5"
+              aria-label="Go to search"
+            >
+              <FiSearch size={18} />
+            </button>
+            <button
+              onClick={() => setShowMobileMenu((prev) => !prev)}
+              className="inline-flex items-center justify-center w-10 h-10 rounded-xl border border-white/15 bg-white/5"
+              aria-label="Toggle menu"
+            >
+              {showMobileMenu ? <FiX size={20} /> : <FiMenu size={20} />}
+            </button>
+          </div>
         </div>
 
         {showMobileMenu && (
@@ -127,9 +137,11 @@ const Navbar = () => {
             <div className="grid grid-cols-2 gap-2">
               {user ? (
                 <>
-                  <Link to="/admin" onClick={() => setShowMobileMenu(false)} className="btn-soft inline-flex items-center justify-center gap-2">
-                    <FiUser size={15} /> Profile
-                  </Link>
+                  {isAdmin && (
+                    <Link to="/admin" onClick={() => setShowMobileMenu(false)} className="btn-soft inline-flex items-center justify-center gap-2">
+                      <FiUser size={15} /> Admin
+                    </Link>
+                  )}
                   <button onClick={handleSignOut} className="btn-soft inline-flex items-center justify-center gap-2">
                     <FiLogOut size={15} /> Sign Out
                   </button>

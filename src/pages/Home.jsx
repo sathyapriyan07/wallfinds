@@ -22,9 +22,9 @@ const Home = () => {
   const heroWallpaper = latestWallpapers[0] || allWallpapers[0];
 
   return (
-    <div className="section-wrap py-8 space-y-12">
+    <div className="section-wrap py-8 space-y-8">
       {heroWallpaper && (
-        <section className="relative min-h-[320px] sm:min-h-[420px] rounded-3xl overflow-hidden border border-white/10">
+        <section className="relative min-h-[260px] max-h-[55vh] rounded-3xl overflow-hidden border border-white/10">
           <img
             src={heroWallpaper.image_url}
             alt={heroWallpaper.title}
@@ -33,18 +33,13 @@ const Home = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/45 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#04060d] via-transparent to-transparent" />
 
-          <div className="relative h-full max-w-2xl px-5 sm:px-8 md:px-12 flex flex-col justify-end py-8 sm:py-12">
+          <div className="relative h-full max-w-2xl px-5 sm:px-8 md:px-12 flex flex-col justify-end py-6 sm:py-8">
             <p className="small-label uppercase tracking-[0.2em] text-indigo-200/90 mb-2">Featured Wallpaper</p>
-            <h1 className="text-3xl sm:text-4xl md:text-6xl font-semibold leading-tight mb-4">{heroWallpaper.title}</h1>
-            <p className="muted mb-6 max-w-xl">
-              Explore cinematic wallpapers, title logos, and category collections crafted in a premium streaming style.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 max-w-sm w-full">
+            <h1 className="text-2xl sm:text-3xl md:text-5xl font-semibold leading-tight mb-3">{heroWallpaper.title}</h1>
+            <p className="muted mb-4">Cinematic wallpapers in full quality.</p>
+            <div className="flex flex-col gap-3 max-w-sm w-full">
               <Link to={`/wallpaper/${heroWallpaper.id}`} className="btn-primary text-center">
                 View Wallpaper
-              </Link>
-              <Link to="/search" className="btn-soft text-center">
-                Explore Library
               </Link>
             </div>
           </div>
@@ -55,7 +50,7 @@ const Home = () => {
         <h2 className="surface-title">Latest Wallpapers</h2>
         <div className="row-scroll scrollbar-hide">
           {latestWallpapers.map((wallpaper) => (
-            <div key={wallpaper.id} className="flex-shrink-0 w-[84%] sm:w-[52%] md:w-[38%] lg:w-[30%] xl:w-[24%]">
+            <div key={wallpaper.id} className="flex-shrink-0 w-[46%] sm:w-[40%] md:w-[30%] lg:w-[24%]">
               <WallpaperCard wallpaper={wallpaper} />
             </div>
           ))}
@@ -66,7 +61,7 @@ const Home = () => {
         <h2 className="surface-title">Trending Wallpapers</h2>
         <div className="row-scroll scrollbar-hide">
           {trendingWallpapers.map((wallpaper) => (
-            <div key={wallpaper.id} className="flex-shrink-0 w-[84%] sm:w-[52%] md:w-[38%] lg:w-[30%] xl:w-[24%]">
+            <div key={wallpaper.id} className="flex-shrink-0 w-[46%] sm:w-[40%] md:w-[30%] lg:w-[24%]">
               <WallpaperCard wallpaper={wallpaper} />
             </div>
           ))}
@@ -78,7 +73,7 @@ const Home = () => {
           <h2 className="surface-title">Movie & Series Logos</h2>
           <div className="row-scroll scrollbar-hide">
             {media.map((item) => (
-              <div key={item.id} className="flex-shrink-0 w-[76%] sm:w-[50%] md:w-[34%] lg:w-[28%] xl:w-[22%]">
+              <div key={item.id} className="flex-shrink-0 w-[52%] sm:w-[40%] md:w-[30%] lg:w-[24%]">
                 <TitleLogoCard media={item} showPoster />
               </div>
             ))}

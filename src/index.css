@@ -72,6 +72,10 @@ small, .small-label {
   border-radius: 999px;
   font-weight: 600;
   padding: 0.62rem 1.1rem;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: transform 180ms ease, box-shadow 220ms ease;
 }
 
@@ -86,6 +90,10 @@ small, .small-label {
   background: rgba(255, 255, 255, 0.04);
   color: var(--text-main);
   padding: 0.56rem 1rem;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-weight: 500;
   transition: background 180ms ease, border-color 180ms ease;
 }
@@ -111,7 +119,7 @@ small, .small-label {
 
 .row-scroll {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   overflow-x: auto;
   padding-bottom: 0.75rem;
   scroll-snap-type: x mandatory;

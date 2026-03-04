@@ -59,7 +59,7 @@ const MoviePage = () => {
       <div>
         <h2 className="text-2xl font-bold mb-6">Wallpapers</h2>
         {wallpapers && wallpapers.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 md:gap-5">
+          <div className="grid grid-cols-2 max-[380px]:grid-cols-1 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
             {wallpapers.map((wallpaper) => (
               <WallpaperCard key={wallpaper.id} wallpaper={wallpaper} />
             ))}

@@ -21,7 +21,7 @@ const CategoryPage = () => {
         <p className="muted">{wallpapers?.length || 0} wallpapers</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 max-[380px]:grid-cols-1 md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6 gap-3 md:gap-4">
         {wallpapers?.map((wallpaper) => (
           <WallpaperCard key={wallpaper.id} wallpaper={wallpaper} />
         ))}

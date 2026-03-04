@@ -115,7 +115,7 @@ const WallpaperDetail = () => {
       {relatedWallpapers && relatedWallpapers.length > 0 && (
         <div className="mt-12">
           <h2 className="text-2xl font-bold mb-6">Related Wallpapers</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 max-[380px]:grid-cols-1 md:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6 gap-3 md:gap-4">
             {relatedWallpapers
               .filter(w => w.id !== wallpaper.id)
               .slice(0, 4)

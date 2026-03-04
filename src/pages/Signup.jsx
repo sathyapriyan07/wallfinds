@@ -26,7 +26,7 @@ const Signup = () => {
 
   return (
     <div className="section-wrap min-h-screen flex items-center justify-center py-8">
-      <div className="w-full max-w-md glass p-8 rounded-2xl">
+      <div className="w-full max-w-sm glass p-6 sm:p-8 rounded-2xl">
         <h1 className="text-3xl font-bold mb-6 text-center">Sign Up</h1>
         
         {error && (
